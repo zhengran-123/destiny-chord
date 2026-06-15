@@ -5,6 +5,8 @@ const tabs = [
   { key: 'dashboard', label: '仪表板', icon: '📊' },
   { key: 'food', label: '饮食', icon: '🍽️' },
   { key: 'exercise', label: '运动', icon: '💪' },
+  { key: 'training', label: '计划', icon: '🎯' },
+  { key: 'body', label: '身体', icon: '📏' },
   { key: 'tasks', label: '任务', icon: '✓' },
   { key: 'analytics', label: '分析', icon: '📈' },
   { key: 'settings', label: '设置', icon: '⚙️' },

@@ -15,6 +15,11 @@ import DataExportImport from './components/DataExportImport';
 import AIAdvice from './components/AIAdvice';
 import InteractiveChart from './components/InteractiveChart';
 import FamilyTracking from './components/FamilyTracking';
+import TrainingPlans from './components/TrainingPlans';
+import BodyMeasurements from './components/BodyMeasurements';
+import WorkoutCalendar from './components/WorkoutCalendar';
+import AchievementBadges from './components/AchievementBadges';
+import WaterTracker from './components/WaterTracker';
 import DarkModeToggle from './components/DarkModeToggle';
 import ReminderNotifications from './components/ReminderNotifications';
 
@@ -25,6 +30,8 @@ import { useCheckIn } from './hooks/useCheckIn';
 import { useGoals } from './hooks/useGoals';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useFirebase } from './hooks/useFirebase';
+import { useBodyData } from './hooks/useBodyData';
+import { useWaterTracker } from './hooks/useWaterTracker';
 
 import { getToday } from './utils/date';
 import { sumDailyNutrition, sumDailyExercise } from './utils/calculation';
@@ -44,6 +51,8 @@ function App() {
   const goalHook = useGoals();
   const { darkMode, toggle: toggleDark } = useDarkMode();
   const firebase = useFirebase();
+  const bodyHook = useBodyData();
+  const waterHook = useWaterTracker();
 
   const todayStr = getToday();
   const streak = checkInHook.getStreak();
@@ -82,17 +91,21 @@ function App() {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <Dashboard
-            mealRecords={mealHook.records}
-            exerciseRecords={exerciseHook.records}
-            tasks={taskHook.tasks}
-            checkInDays={checkInHook.checkInDays}
-            streak={streak}
-            goals={goalHook.goals}
-            date={date} setDate={setDate}
-            onCheckIn={handleCheckIn}
-            isCheckedInToday={isCheckedIn}
-          />
+          <div className="space-y-6">
+            <Dashboard
+              mealRecords={mealHook.records}
+              exerciseRecords={exerciseHook.records}
+              tasks={taskHook.tasks}
+              checkInDays={checkInHook.checkInDays}
+              streak={streak}
+              goals={goalHook.goals}
+              date={date} setDate={setDate}
+              onCheckIn={handleCheckIn}
+              isCheckedInToday={isCheckedIn}
+            />
+            <WaterTracker todayCups={waterHook.todayCups} addWater={waterHook.addWater} removeWater={waterHook.removeWater} />
+            <WorkoutCalendar exerciseRecords={exerciseHook.records} mealRecords={mealHook.records} />
+          </div>
         );
 
       case 'food':
@@ -115,6 +128,29 @@ function App() {
             deleteExercise={exerciseHook.deleteExercise}
             date={date} setDate={setDate}
           />
+        );
+
+      case 'training':
+        return (
+          <TrainingPlans />
+        );
+
+      case 'body':
+        return (
+          <div className="space-y-6">
+            <BodyMeasurements
+              records={bodyHook.records}
+              addRecord={bodyHook.addRecord}
+              deleteRecord={bodyHook.deleteRecord}
+            />
+            <AchievementBadges
+              checkInDays={checkInHook.checkInDays}
+              exerciseRecords={exerciseHook.records}
+              mealRecords={mealHook.records}
+              tasks={taskHook.tasks}
+              goals={goalHook.goals}
+            />
+          </div>
         );
 
       case 'tasks':
