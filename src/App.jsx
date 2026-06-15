@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import SplashScreen from './components/SplashScreen';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import FoodTracker from './components/FoodTracker';
@@ -31,6 +32,7 @@ import { sumDailyNutrition, sumDailyExercise } from './utils/calculation';
 import './fonts';
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [date, setDate] = useState(getToday());
 
@@ -245,6 +247,11 @@ function App() {
     }
   };
 
+  // 显示启动画面
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 ${darkMode ? 'dark' : ''}`}>
       {/* 通知提醒 */}
@@ -288,7 +295,7 @@ function App() {
 
       {/* 底部信息 */}
       <footer className="text-center py-4 text-xs text-gray-400">
-        💪 健康追踪 · 数据存储在本地浏览器 · 隐私完全保护
+        🎵 命运和弦 · 数据存储在本地浏览器 · 隐私完全保护
       </footer>
     </div>
   );

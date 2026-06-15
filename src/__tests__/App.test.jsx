@@ -74,8 +74,8 @@ describe('食物数据库 (foods.js)', () => {
     expect(getFoodCount()).toBeGreaterThanOrEqual(500);
   });
 
-  it('应有 9 个分类', () => {
-    expect(foodCategories).toHaveLength(9);
+  it('应有 11 个分类', () => {
+    expect(foodCategories).toHaveLength(11);
   });
 
   it('searchFoods 应能搜索', () => {

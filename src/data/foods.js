@@ -547,6 +547,150 @@ const seasoningFoods = [
   { name: '炼乳', calories: 321, protein: 8.0, carbs: 54.0, fat: 8.7 },
 ];
 
+// ==================== 快餐分类 ====================
+// 麦当劳 + 肯德基 完整菜单
+
+const mcdonaldsFoods = [
+  // ===== 汉堡 =====
+  { name: '麦当劳-汉堡包', calories: 254, protein: 13.0, carbs: 30.0, fat: 8.5 },
+  { name: '麦当劳-吉士汉堡包', calories: 308, protein: 16.0, carbs: 30.0, fat: 13.0 },
+  { name: '麦当劳-双层吉士汉堡包', calories: 445, protein: 27.0, carbs: 31.0, fat: 23.0 },
+  { name: '麦当劳-巨无霸', calories: 484, protein: 26.0, carbs: 40.0, fat: 24.0 },
+  { name: '麦当劳-麦香鱼', calories: 331, protein: 15.0, carbs: 38.0, fat: 13.0 },
+  { name: '麦当劳-麦香鸡', calories: 390, protein: 15.0, carbs: 40.0, fat: 19.0 },
+  { name: '麦当劳-麦辣鸡腿汉堡', calories: 553, protein: 24.0, carbs: 46.0, fat: 30.0 },
+  { name: '麦当劳-板烧鸡腿堡', calories: 418, protein: 27.0, carbs: 35.0, fat: 17.5 },
+  { name: '麦当劳-不素之霸双层牛堡', calories: 520, protein: 32.0, carbs: 36.0, fat: 25.0 },
+  { name: '麦当劳-培根蔬萃双层牛堡', calories: 490, protein: 30.0, carbs: 38.0, fat: 22.0 },
+  { name: '麦当劳-黑椒鸡腿珍宝三角', calories: 394, protein: 22.0, carbs: 38.0, fat: 16.0 },
+  { name: '麦当劳-卡罗比牛肉珍宝三角', calories: 418, protein: 24.0, carbs: 37.0, fat: 18.0 },
+  // ===== 炸鸡小食 =====
+  { name: '麦当劳-麦乐鸡（4块）', calories: 223, protein: 13.0, carbs: 15.0, fat: 12.5 },
+  { name: '麦当劳-麦乐鸡（6块）', calories: 335, protein: 19.5, carbs: 22.5, fat: 18.8 },
+  { name: '麦当劳-麦乐鸡（10块）', calories: 558, protein: 32.5, carbs: 37.5, fat: 31.3 },
+  { name: '麦当劳-麦辣鸡翅（2块）', calories: 236, protein: 14.0, carbs: 13.0, fat: 14.0 },
+  { name: '麦当劳-麦辣鸡翅（4块）', calories: 472, protein: 28.0, carbs: 26.0, fat: 28.0 },
+  { name: '麦当劳-那么大鸡排', calories: 380, protein: 25.0, carbs: 22.0, fat: 20.0 },
+  // ===== 薯条/小食 =====
+  { name: '麦当劳-薯条（小）', calories: 245, protein: 3.0, carbs: 35.0, fat: 11.0 },
+  { name: '麦当劳-薯条（中）', calories: 338, protein: 4.0, carbs: 47.0, fat: 15.0 },
+  { name: '麦当劳-薯条（大）', calories: 416, protein: 5.0, carbs: 58.0, fat: 18.5 },
+  { name: '麦当劳-玉米杯', calories: 54, protein: 2.0, carbs: 12.0, fat: 0.5 },
+  { name: '麦当劳-苹果片', calories: 32, protein: 0.2, carbs: 8.0, fat: 0.1 },
+  // ===== 甜品 =====
+  { name: '麦当劳-甜筒/圆筒冰淇淋', calories: 146, protein: 3.5, carbs: 22.0, fat: 5.0 },
+  { name: '麦当劳-草莓新地', calories: 284, protein: 5.0, carbs: 45.0, fat: 10.0 },
+  { name: '麦当劳-巧克力新地', calories: 309, protein: 5.5, carbs: 47.0, fat: 11.5 },
+  { name: '麦当劳-菠萝新地', calories: 284, protein: 5.0, carbs: 46.0, fat: 9.5 },
+  { name: '麦当劳-奥利奥麦旋风', calories: 340, protein: 6.0, carbs: 48.0, fat: 13.0 },
+  { name: '麦当劳-趣多多麦旋风', calories: 355, protein: 5.5, carbs: 50.0, fat: 14.0 },
+  { name: '麦当劳-苹果派', calories: 231, protein: 2.0, carbs: 33.0, fat: 10.0 },
+  { name: '麦当劳-菠萝派', calories: 241, protein: 2.0, carbs: 34.0, fat: 10.5 },
+  { name: '麦当劳-香芋派', calories: 255, protein: 2.5, carbs: 36.0, fat: 11.0 },
+  { name: '麦当劳-红豆派', calories: 248, protein: 3.0, carbs: 35.0, fat: 10.0 },
+  { name: '麦当劳-椰子派', calories: 238, protein: 2.0, carbs: 34.0, fat: 9.5 },
+  // ===== 饮品 =====
+  { name: '麦当劳-可口可乐（小）', calories: 105, protein: 0, carbs: 26.0, fat: 0 },
+  { name: '麦当劳-可口可乐（中）', calories: 144, protein: 0, carbs: 36.0, fat: 0 },
+  { name: '麦当劳-可口可乐（大）', calories: 220, protein: 0, carbs: 55.0, fat: 0 },
+  { name: '麦当劳-雪碧（小）', calories: 115, protein: 0, carbs: 29.0, fat: 0 },
+  { name: '麦当劳-雪碧（中）', calories: 158, protein: 0, carbs: 40.0, fat: 0 },
+  { name: '麦当劳-雪碧（大）', calories: 241, protein: 0, carbs: 61.0, fat: 0 },
+  { name: '麦当劳-芬达（小）', calories: 125, protein: 0, carbs: 32.0, fat: 0 },
+  { name: '麦当劳-芬达（中）', calories: 172, protein: 0, carbs: 43.0, fat: 0 },
+  { name: '麦当劳-芬达（大）', calories: 262, protein: 0, carbs: 66.0, fat: 0 },
+  { name: '麦当劳-香草奶昔（小）', calories: 273, protein: 7.0, carbs: 42.0, fat: 8.0 },
+  { name: '麦当劳-香草奶昔（大）', calories: 364, protein: 9.0, carbs: 56.0, fat: 11.0 },
+  { name: '麦当劳-巧克力奶昔（小）', calories: 288, protein: 7.5, carbs: 44.0, fat: 8.5 },
+  { name: '麦当劳-巧克力奶昔（大）', calories: 385, protein: 10.0, carbs: 58.0, fat: 11.5 },
+  { name: '麦当劳-草莓奶昔（小）', calories: 275, protein: 7.0, carbs: 43.0, fat: 8.0 },
+  { name: '麦当劳-草莓奶昔（大）', calories: 366, protein: 9.5, carbs: 57.0, fat: 10.5 },
+  { name: '麦当劳-热巧克力', calories: 187, protein: 6.0, carbs: 28.0, fat: 5.0 },
+  { name: '麦当劳-纯牛奶', calories: 136, protein: 6.5, carbs: 9.5, fat: 7.5 },
+  { name: '麦当劳-纯橙汁', calories: 149, protein: 1.5, carbs: 34.0, fat: 0.3 },
+  { name: '麦当劳-冰咖啡', calories: 48, protein: 1.0, carbs: 9.0, fat: 0.5 },
+  { name: '麦当劳-冰拿铁', calories: 120, protein: 5.0, carbs: 12.0, fat: 5.0 },
+  // ===== 早餐 =====
+  { name: '麦当劳-猪柳蛋麦满分', calories: 407, protein: 24.0, carbs: 29.0, fat: 22.0 },
+  { name: '麦当劳-吉士蛋麦满分', calories: 309, protein: 16.0, carbs: 29.0, fat: 14.0 },
+  { name: '麦当劳-大脆鸡扒麦满分', calories: 420, protein: 18.0, carbs: 36.0, fat: 22.0 },
+  { name: '麦当劳-脆鸡扒麦满分', calories: 390, protein: 17.0, carbs: 34.0, fat: 20.5 },
+  { name: '麦当劳-板烧鸡腿麦满分', calories: 380, protein: 22.0, carbs: 32.0, fat: 16.0 },
+  { name: '麦当劳-烟肉蛋松饼', calories: 291, protein: 16.0, carbs: 25.0, fat: 14.0 },
+  { name: '麦当劳-早晨全餐', calories: 604, protein: 30.0, carbs: 42.0, fat: 34.0 },
+  { name: '麦当劳-热香饼+猪柳', calories: 474, protein: 16.0, carbs: 56.0, fat: 20.0 },
+  { name: '麦当劳-火腿蛋麦香酥', calories: 350, protein: 15.0, carbs: 32.0, fat: 18.0 },
+  { name: '麦当劳-谷物鸡肉麦鲜粥', calories: 185, protein: 12.0, carbs: 28.0, fat: 3.0 },
+  { name: '麦当劳-脆香油条', calories: 235, protein: 5.0, carbs: 30.0, fat: 10.0 },
+  { name: '麦当劳-薯饼', calories: 150, protein: 1.5, carbs: 18.0, fat: 8.0 },
+  // ===== 沙拉/轻食 =====
+  { name: '麦当劳-田园沙拉', calories: 45, protein: 2.0, carbs: 7.0, fat: 1.0 },
+  { name: '麦当劳-烤鸡沙拉', calories: 180, protein: 22.0, carbs: 10.0, fat: 6.0 },
+];
+
+const kfcFoods = [
+  // ===== 炸鸡 =====
+  { name: '肯德基-吮指原味鸡（1块）', calories: 242, protein: 19.0, carbs: 7.0, fat: 15.0 },
+  { name: '肯德基-香辣鸡翅（1对）', calories: 196, protein: 13.0, carbs: 8.0, fat: 12.0 },
+  { name: '肯德基-新奥尔良烤翅（1对）', calories: 112, protein: 11.0, carbs: 4.0, fat: 5.5 },
+  { name: '肯德基-鸡米花（小）', calories: 231, protein: 15.0, carbs: 14.0, fat: 12.0 },
+  { name: '肯德基-鸡米花（中）', calories: 318, protein: 20.0, carbs: 19.0, fat: 16.5 },
+  { name: '肯德基-鸡米花（大）', calories: 390, protein: 25.0, carbs: 23.0, fat: 20.0 },
+  { name: '肯德基-上校鸡块（5块）', calories: 243, protein: 16.0, carbs: 13.0, fat: 13.5 },
+  { name: '肯德基-上校鸡块（10块）', calories: 486, protein: 32.0, carbs: 26.0, fat: 27.0 },
+  { name: '肯德基-黄金鸡块', calories: 260, protein: 18.0, carbs: 14.0, fat: 14.0 },
+  // ===== 汉堡 =====
+  { name: '肯德基-香辣鸡腿堡', calories: 570, protein: 26.0, carbs: 48.0, fat: 30.0 },
+  { name: '肯德基-新奥尔良烤鸡腿堡', calories: 450, protein: 28.0, carbs: 42.0, fat: 17.0 },
+  { name: '肯德基-劲脆鸡腿堡', calories: 555, protein: 24.0, carbs: 47.0, fat: 29.5 },
+  { name: '肯德基-深海鳕鱼堡', calories: 420, protein: 18.0, carbs: 42.0, fat: 19.0 },
+  { name: '肯德基-汁汁厚牛堡', calories: 520, protein: 30.0, carbs: 38.0, fat: 24.0 },
+  // ===== 米饭/卷 =====
+  { name: '肯德基-老北京鸡肉卷', calories: 410, protein: 20.0, carbs: 38.0, fat: 19.0 },
+  { name: '肯德基-川辣嫩牛五方', calories: 380, protein: 22.0, carbs: 32.0, fat: 17.0 },
+  { name: '肯德基-鸡腿饭', calories: 520, protein: 26.0, carbs: 58.0, fat: 18.0 },
+  { name: '肯德基-香辣鸡排饭', calories: 560, protein: 22.0, carbs: 62.0, fat: 22.0 },
+  // ===== 小食 =====
+  { name: '肯德基-薯条（小）', calories: 230, protein: 3.0, carbs: 33.0, fat: 10.0 },
+  { name: '肯德基-薯条（中）', calories: 320, protein: 4.0, carbs: 45.0, fat: 14.0 },
+  { name: '肯德基-薯条（大）', calories: 400, protein: 5.0, carbs: 56.0, fat: 17.0 },
+  { name: '肯德基-土豆泥', calories: 120, protein: 2.5, carbs: 18.0, fat: 4.5 },
+  { name: '肯德基-香甜粟米棒', calories: 135, protein: 4.0, carbs: 25.0, fat: 2.0 },
+  { name: '肯德基-玉米沙拉', calories: 78, protein: 2.0, carbs: 12.0, fat: 2.5 },
+  { name: '肯德基-芙蓉鲜蔬汤', calories: 42, protein: 1.5, carbs: 7.0, fat: 0.8 },
+  { name: '肯德基-劲爆鸡米花（大）', calories: 420, protein: 26.0, carbs: 25.0, fat: 22.0 },
+  // ===== 甜品 =====
+  { name: '肯德基-葡式蛋挞（原味）', calories: 196, protein: 3.5, carbs: 18.0, fat: 11.5 },
+  { name: '肯德基-提拉米苏蛋挞', calories: 172, protein: 3.0, carbs: 16.0, fat: 10.0 },
+  { name: '肯德基-卡仕达蛋挞', calories: 186, protein: 3.5, carbs: 17.0, fat: 11.0 },
+  { name: '肯德基-草莓圣代', calories: 227, protein: 3.5, carbs: 36.0, fat: 8.0 },
+  { name: '肯德基-巧克力圣代', calories: 270, protein: 4.0, carbs: 38.0, fat: 11.0 },
+  { name: '肯德基-蓝莓圣代', calories: 235, protein: 3.5, carbs: 37.0, fat: 8.5 },
+  // ===== 饮品 =====
+  { name: '肯德基-百事可乐（小）', calories: 108, protein: 0, carbs: 27.0, fat: 0 },
+  { name: '肯德基-百事可乐（中）', calories: 148, protein: 0, carbs: 37.0, fat: 0 },
+  { name: '肯德基-百事可乐（大）', calories: 225, protein: 0, carbs: 57.0, fat: 0 },
+  { name: '肯德基-七喜（小）', calories: 112, protein: 0, carbs: 28.0, fat: 0 },
+  { name: '肯德基-七喜（中）', calories: 155, protein: 0, carbs: 39.0, fat: 0 },
+  { name: '肯德基-七喜（大）', calories: 238, protein: 0, carbs: 60.0, fat: 0 },
+  { name: '肯德基-美年达（中）', calories: 160, protein: 0, carbs: 40.0, fat: 0 },
+  { name: '肯德基-九珍果汁', calories: 165, protein: 0.3, carbs: 41.0, fat: 0.1 },
+  { name: '肯德基-柠檬红茶', calories: 120, protein: 0.1, carbs: 30.0, fat: 0 },
+  { name: '肯德基-冰拿铁', calories: 115, protein: 5.0, carbs: 11.0, fat: 5.0 },
+  { name: '肯德基-热牛奶', calories: 130, protein: 6.0, carbs: 9.0, fat: 7.0 },
+  // ===== KFC早餐 =====
+  { name: '肯德基-芝士猪柳帕尼尼', calories: 380, protein: 22.0, carbs: 30.0, fat: 18.0 },
+  { name: '肯德基-鸡肉帕尼尼', calories: 350, protein: 20.0, carbs: 32.0, fat: 15.0 },
+  { name: '肯德基-培根蛋帕尼尼', calories: 320, protein: 18.0, carbs: 28.0, fat: 15.0 },
+  { name: '肯德基-皮蛋瘦肉粥', calories: 165, protein: 8.0, carbs: 25.0, fat: 3.0 },
+  { name: '肯德基-香菇鸡肉粥', calories: 155, protein: 10.0, carbs: 22.0, fat: 2.5 },
+  { name: '肯德基-安心油条', calories: 230, protein: 5.0, carbs: 29.0, fat: 10.0 },
+  { name: '肯德基-太阳蛋', calories: 80, protein: 6.5, carbs: 0.5, fat: 5.5 },
+  // ===== 桶/套餐 =====
+  { name: '肯德基-全家桶（5块鸡）', calories: 1210, protein: 95.0, carbs: 35.0, fat: 75.0 },
+  { name: '肯德基-超值全家桶', calories: 1680, protein: 130.0, carbs: 55.0, fat: 100.0 },
+];
+
 /** 构建完整的食物数据库 */
 function buildFoodDatabase() {
   const categories = [
@@ -559,6 +703,8 @@ function buildFoodDatabase() {
     { key: 'drink', label: '饮品', icon: '🥤', foods: drinkFoods },
     { key: 'bean', label: '豆类蛋奶', icon: '🫘', foods: beanFoods },
     { key: 'seasoning', label: '调味品', icon: '🧂', foods: seasoningFoods },
+    { key: 'mcdonalds', label: '麦当劳', icon: '🍔', foods: mcdonaldsFoods },
+    { key: 'kfc', label: '肯德基', icon: '🍗', foods: kfcFoods },
   ];
 
   let id = 0;

@@ -15,13 +15,14 @@ export function useExercise() {
     saveExerciseRecords(newRecords);
   }, []);
 
-  const addExercise = useCallback((name, sets, reps, date = null) => {
+  const addExercise = useCallback((name, sets, reps, caloriesBurned = 0, date = null) => {
     const record = {
       id: Date.now(),
       name,
       sets: Number(sets),
       reps: Number(reps),
       totalVolume: calcExerciseVolume(sets, reps),
+      caloriesBurned: Math.round(caloriesBurned),
       date: date || getToday(),
       time: getNowTime(),
     };
