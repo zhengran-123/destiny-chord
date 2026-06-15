@@ -34,6 +34,7 @@ export default function Dashboard({
     const todayTasks = tasks.filter(t => t.date === todayStr);
     const nutrition = sumDailyNutrition(todayMeals);
     const exerciseVolume = sumDailyExercise(todayExercises);
+    const exerciseCalories = todayExercises.reduce((s, e) => s + (e.caloriesBurned || 0), 0);
     const completedTasks = todayTasks.filter(t => t.completed).length;
 
     return {
@@ -43,6 +44,7 @@ export default function Dashboard({
       fat: nutrition.fat,
       exerciseCount: todayExercises.length,
       exerciseVolume,
+      exerciseCalories,
       taskProgress: {
         completed: completedTasks,
         total: todayTasks.length,
@@ -115,6 +117,90 @@ export default function Dashboard({
         <StatCard icon={Target} label="蛋白质" value={todayStats.protein} unit="g" color="blue" />
         <StatCard icon={Activity} label="运动项数" value={todayStats.exerciseCount} unit="项" color="green" />
         <StatCard icon={Award} label="任务进度" value={`${todayStats.taskProgress.completed}/${todayStats.taskProgress.total}`} unit="" color="purple" />
+      </div>
+
+      {/* 热量收支分析 */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+        <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
+          ⚖️ 今日热量收支
+        </h3>
+        <div className="grid grid-cols-3 gap-4 text-center mb-4">
+          <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
+            <p className="text-xs text-gray-500 mb-1">🍽️ 摄入</p>
+            <p className="text-xl font-bold text-orange-500">{todayStats.totalCalories}</p>
+            <p className="text-xs text-gray-400">kcal</p>
+          </div>
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
+            <p className="text-xs text-gray-500 mb-1">🔥 运动消耗</p>
+            <p className="text-xl font-bold text-green-500">{todayStats.exerciseCalories}</p>
+            <p className="text-xs text-gray-400">kcal</p>
+          </div>
+          <div className={`rounded-xl p-3 ${
+            todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories > 0
+              ? 'bg-red-50 dark:bg-red-900/20'
+              : 'bg-blue-50 dark:bg-blue-900/20'
+          }`}>
+            <p className="text-xs text-gray-500 mb-1">📊 净余额</p>
+            <p className={`text-xl font-bold ${
+              todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories > 0
+                ? 'text-red-500'
+                : 'text-blue-500'
+            }`}>
+              {todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories > 0 ? '+' : ''}
+              {todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories}
+            </p>
+            <p className="text-xs text-gray-400">kcal</p>
+          </div>
+        </div>
+
+        {/* 可视化进度条 */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>基础代谢约 1800 kcal</span>
+            <span>目标 {goals.dailyCalories} kcal</span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden flex">
+            {/* 基础代谢 */}
+            <div className="h-full bg-gray-300 dark:bg-gray-600" style={{ width: '65%' }} />
+            {/* 运动消耗 */}
+            {todayStats.exerciseCalories > 0 && (
+              <div className="h-full bg-green-400" style={{ width: `${Math.min(30, todayStats.exerciseCalories / 1800 * 100)}%` }} />
+            )}
+            {/* 摄入热量（超过基础代谢+运动的部分标红） */}
+            {todayStats.totalCalories > 0 && (
+              <div
+                className={`h-full ${todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories > 0 ? 'bg-red-400' : 'bg-orange-400'}`}
+                style={{ width: `${Math.min(35, todayStats.totalCalories / 1800 * 100)}%` }}
+              />
+            )}
+          </div>
+          <div className="flex justify-between text-xs text-gray-400">
+            <span>💤 基础代谢 ≈1800</span>
+            <span>🔥 运动 {todayStats.exerciseCalories}</span>
+            <span>🍽️ 摄入 {todayStats.totalCalories}</span>
+          </div>
+        </div>
+
+        {/* 结论 */}
+        <div className={`mt-4 p-3 rounded-xl text-sm font-medium text-center ${
+          todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories > 300
+            ? 'bg-red-50 dark:bg-red-900/20 text-red-600 border border-red-200 dark:border-red-800'
+            : todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories < -500
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 border border-blue-200 dark:border-blue-800'
+              : 'bg-green-50 dark:bg-green-900/20 text-green-600 border border-green-200 dark:border-green-800'
+        }`}>
+          {todayStats.totalCalories === 0 ? (
+            '📝 今天还没有记录饮食，开始记录吧'
+          ) : todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories > 300 ? (
+            <>⚠️ 今日热量盈余较大（+{todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories}kcal），建议增加运动或减少摄入</>
+          ) : todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories < -500 ? (
+            <>💡 今日热量缺口较大（{todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories}kcal），注意补充营养</>
+          ) : todayStats.totalCalories - todayStats.exerciseCalories - goals.dailyCalories >= 0 ? (
+            <>✅ 热量控制良好，收支基本平衡</>
+          ) : (
+            <>🎯 今日有适度热量缺口，有利于减脂目标</>
+          )}
+        </div>
       </div>
 
       {/* 目标进度条 */}
