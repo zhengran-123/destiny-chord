@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, Dumbbell, X, Flame, Search } from 'lucide-react';
+import { Plus, Trash2, Dumbbell, X, Flame, Search, Info } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { getToday } from '../utils/date';
+import ExerciseDetail from './ExerciseDetail';
 
 // ==================== 100+ 运动数据库（含每30分钟消耗热量） ====================
 const EXERCISE_DB = [
@@ -196,6 +197,7 @@ export default function ExerciseTracker({ records, addExercise, deleteExercise, 
   const [customName, setCustomName] = useState('');
   const [activeCat, setActiveCat] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [detailExercise, setDetailExercise] = useState(null);
 
   const todayStr = getToday();
 
@@ -455,6 +457,12 @@ export default function ExerciseTracker({ records, addExercise, deleteExercise, 
                         <p className="text-xs text-orange-500 font-medium">{ex.caloriesBurned} kcal</p>
                       )}
                     </div>
+                    {exDef && (
+                      <button onClick={() => setDetailExercise(exDef)}
+                        className="p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-400 hover:text-blue-500 transition-colors">
+                        <Info size={16} />
+                      </button>
+                    )}
                     <button
                       onClick={() => { deleteExercise(ex.id); toast.info('已删除'); }}
                       className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors"
@@ -468,6 +476,11 @@ export default function ExerciseTracker({ records, addExercise, deleteExercise, 
           )}
         </div>
       </div>
+
+      {/* 运动详情弹窗 */}
+      {detailExercise && (
+        <ExerciseDetail exercise={detailExercise} onClose={() => setDetailExercise(null)} />
+      )}
     </div>
   );
 }
