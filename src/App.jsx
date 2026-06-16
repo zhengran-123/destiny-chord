@@ -136,6 +136,7 @@ function App() {
               date={date} setDate={setDate}
             />
             <WorkoutTimer />
+            <WarmUpGuide />
           </div>
         );
 
