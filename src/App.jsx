@@ -20,6 +20,9 @@ import BodyMeasurements from './components/BodyMeasurements';
 import WorkoutCalendar from './components/WorkoutCalendar';
 import AchievementBadges from './components/AchievementBadges';
 import WaterTracker from './components/WaterTracker';
+import WorkoutTimer from './components/WorkoutTimer';
+import SleepTracker from './components/SleepTracker';
+import WarmUpGuide from './components/WarmUpGuide';
 import DarkModeToggle from './components/DarkModeToggle';
 import ReminderNotifications from './components/ReminderNotifications';
 
@@ -122,12 +125,16 @@ function App() {
 
       case 'exercise':
         return (
-          <ExerciseTracker
-            records={exerciseHook.records}
-            addExercise={exerciseHook.addExercise}
-            deleteExercise={exerciseHook.deleteExercise}
-            date={date} setDate={setDate}
-          />
+          <div className="space-y-6">
+            <ExerciseTracker
+              records={exerciseHook.records}
+              addExercise={exerciseHook.addExercise}
+              deleteExercise={exerciseHook.deleteExercise}
+              date={date} setDate={setDate}
+            />
+            <WorkoutTimer />
+            <WarmUpGuide />
+          </div>
         );
 
       case 'training':
@@ -150,6 +157,7 @@ function App() {
               tasks={taskHook.tasks}
               goals={goalHook.goals}
             />
+            <SleepTracker />
           </div>
         );
 
