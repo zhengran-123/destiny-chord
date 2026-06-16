@@ -35,6 +35,8 @@ import { useDarkMode } from './hooks/useDarkMode';
 import { useFirebase } from './hooks/useFirebase';
 import { useBodyData } from './hooks/useBodyData';
 import { useWaterTracker } from './hooks/useWaterTracker';
+import { useUserProfile } from './hooks/useUserProfile';
+import UserProfile from './components/UserProfile';
 
 import { getToday } from './utils/date';
 import { sumDailyNutrition, sumDailyExercise } from './utils/calculation';
@@ -56,6 +58,7 @@ function App() {
   const firebase = useFirebase();
   const bodyHook = useBodyData();
   const waterHook = useWaterTracker();
+  const userProfileHook = useUserProfile();
 
   const todayStr = getToday();
   const streak = checkInHook.getStreak();
@@ -133,7 +136,6 @@ function App() {
               date={date} setDate={setDate}
             />
             <WorkoutTimer />
-            <WarmUpGuide />
           </div>
         );
 
@@ -196,6 +198,13 @@ function App() {
       case 'settings':
         return (
           <div className="space-y-6">
+            <UserProfile
+              profile={userProfileHook.profile}
+              bmr={userProfileHook.bmr}
+              tdee={userProfileHook.tdee}
+              bmiVal={userProfileHook.bmiVal}
+              updateProfile={userProfileHook.updateProfile}
+            />
             <GoalSettings
               goals={goalHook.goals}
               updateGoals={goalHook.updateGoals}
