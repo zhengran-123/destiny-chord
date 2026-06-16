@@ -37,6 +37,10 @@ import { useBodyData } from './hooks/useBodyData';
 import { useWaterTracker } from './hooks/useWaterTracker';
 import { useUserProfile } from './hooks/useUserProfile';
 import UserProfile from './components/UserProfile';
+import HabitTracker from './components/HabitTracker';
+import BreathingGuide from './components/BreathingGuide';
+import MoodTracker from './components/MoodTracker';
+import PersonalRecords from './components/PersonalRecords';
 
 import { getToday } from './utils/date';
 import { sumDailyNutrition, sumDailyExercise } from './utils/calculation';
@@ -111,6 +115,8 @@ function App() {
             />
             <WaterTracker todayCups={waterHook.todayCups} addWater={waterHook.addWater} removeWater={waterHook.removeWater} />
             <WorkoutCalendar exerciseRecords={exerciseHook.records} mealRecords={mealHook.records} />
+            <MoodTracker />
+            <HabitTracker />
           </div>
         );
 
@@ -136,7 +142,7 @@ function App() {
               date={date} setDate={setDate}
             />
             <WorkoutTimer />
-            <WarmUpGuide />
+            <BreathingGuide />
           </div>
         );
 
@@ -161,6 +167,7 @@ function App() {
               goals={goalHook.goals}
             />
             <SleepTracker />
+            <PersonalRecords exerciseRecords={exerciseHook.records} />
           </div>
         );
 
