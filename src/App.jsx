@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import SplashScreen from './components/SplashScreen';
 import Header from './components/Header';
-import Dashboard from './components/Dashboard';
+import OnboardingWizard from './components/OnboardingWizard';
+import TodayPage from './components/TodayPage';
 import FoodTracker from './components/FoodTracker';
 import ExerciseTracker from './components/ExerciseTracker';
 import TaskManager from './components/TaskManager';
@@ -19,12 +20,13 @@ import TrainingPlans from './components/TrainingPlans';
 import BodyMeasurements from './components/BodyMeasurements';
 import WorkoutCalendar from './components/WorkoutCalendar';
 import AchievementBadges from './components/AchievementBadges';
-import WaterTracker from './components/WaterTracker';
 import WorkoutTimer from './components/WorkoutTimer';
 import SleepTracker from './components/SleepTracker';
-import WarmUpGuide from './components/WarmUpGuide';
+import BreathingGuide from './components/BreathingGuide';
+import PersonalRecords from './components/PersonalRecords';
 import DarkModeToggle from './components/DarkModeToggle';
 import ReminderNotifications from './components/ReminderNotifications';
+import UserProfileComponent from './components/UserProfile';
 
 import { useMealRecords } from './hooks/useMealRecords';
 import { useExercise } from './hooks/useExercise';
@@ -36,11 +38,6 @@ import { useFirebase } from './hooks/useFirebase';
 import { useBodyData } from './hooks/useBodyData';
 import { useWaterTracker } from './hooks/useWaterTracker';
 import { useUserProfile } from './hooks/useUserProfile';
-import UserProfile from './components/UserProfile';
-import HabitTracker from './components/HabitTracker';
-import BreathingGuide from './components/BreathingGuide';
-import MoodTracker from './components/MoodTracker';
-import PersonalRecords from './components/PersonalRecords';
 
 import { getToday } from './utils/date';
 import { sumDailyNutrition, sumDailyExercise } from './utils/calculation';
@@ -51,8 +48,9 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [date, setDate] = useState(getToday());
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // 自定义 hooks
+  // Custom hooks
   const mealHook = useMealRecords();
   const exerciseHook = useExercise();
   const taskHook = useTasks();
@@ -68,14 +66,33 @@ function App() {
   const streak = checkInHook.getStreak();
   const isCheckedIn = checkInHook.isCheckedInToday();
 
-  // 今日统计数据
+  // 检查是否首次使用 → 展示问卷
+  useEffect(() => {
+    if (!showSplash && !userProfileHook.onboardingDone) {
+      setShowOnboarding(true);
+    }
+  }, [showSplash, userProfileHook.onboardingDone]);
+
+  const handleOnboardingComplete = useCallback((data) => {
+    userProfileHook.completeOnboarding(data);
+    setShowOnboarding(false);
+  }, [userProfileHook]);
+
+  const handleCheckIn = useCallback(() => {
+    checkInHook.checkIn();
+  }, [checkInHook]);
+
+  const handleNavigate = useCallback((tab) => {
+    setActiveTab(tab);
+  }, []);
+
+  // 今日统计数据（给 TodayPage 用）
   const todayStats = useMemo(() => {
     const todayMeals = mealHook.records.filter(m => m.date === todayStr);
     const todayEx = exerciseHook.records.filter(e => e.date === todayStr);
     const todayTasks = taskHook.tasks.filter(t => t.date === todayStr);
     const nutrition = sumDailyNutrition(todayMeals);
     const completedTasks = todayTasks.filter(t => t.completed).length;
-
     return {
       totalCalories: nutrition.calories,
       protein: nutrition.protein,
@@ -83,6 +100,7 @@ function App() {
       fat: nutrition.fat,
       exerciseCount: todayEx.length,
       exerciseVolume: sumDailyExercise(todayEx),
+      exerciseCalories: todayEx.reduce((s, e) => s + (e.caloriesBurned || 0), 0),
       taskProgress: {
         completed: completedTasks,
         total: todayTasks.length,
@@ -91,33 +109,28 @@ function App() {
     };
   }, [mealHook.records, exerciseHook.records, taskHook.tasks, todayStr]);
 
-  const handleCheckIn = useCallback(() => {
-    checkInHook.checkIn();
-  }, [checkInHook]);
-
   const renderTab = () => {
-    const commonProps = { date, setDate };
-
     switch (activeTab) {
       case 'dashboard':
         return (
-          <div className="space-y-6">
-            <Dashboard
-              mealRecords={mealHook.records}
-              exerciseRecords={exerciseHook.records}
-              tasks={taskHook.tasks}
-              checkInDays={checkInHook.checkInDays}
-              streak={streak}
-              goals={goalHook.goals}
-              date={date} setDate={setDate}
-              onCheckIn={handleCheckIn}
-              isCheckedInToday={isCheckedIn}
-            />
-            <WaterTracker todayCups={waterHook.todayCups} addWater={waterHook.addWater} removeWater={waterHook.removeWater} />
-            <WorkoutCalendar exerciseRecords={exerciseHook.records} mealRecords={mealHook.records} />
-            <MoodTracker />
-            <HabitTracker />
-          </div>
+          <TodayPage
+            mealRecords={mealHook.records}
+            exerciseRecords={exerciseHook.records}
+            tasks={taskHook.tasks}
+            checkInDays={checkInHook.checkInDays}
+            streak={streak}
+            goals={goalHook.goals}
+            waterHook={waterHook}
+            profile={userProfileHook.profile}
+            tdee={userProfileHook.tdee}
+            recommendedCalories={userProfileHook.recommendedCalories}
+            recommendedProtein={userProfileHook.recommendedProtein}
+            onCheckIn={handleCheckIn}
+            isCheckedInToday={isCheckedIn}
+            onNavigate={handleNavigate}
+            addMeal={mealHook.addMeal}
+            addExercise={exerciseHook.addExercise}
+          />
         );
 
       case 'food':
@@ -147,9 +160,7 @@ function App() {
         );
 
       case 'training':
-        return (
-          <TrainingPlans />
-        );
+        return <TrainingPlans />;
 
       case 'body':
         return (
@@ -206,12 +217,14 @@ function App() {
       case 'settings':
         return (
           <div className="space-y-6">
-            <UserProfile
+            <UserProfileComponent
               profile={userProfileHook.profile}
               bmr={userProfileHook.bmr}
               tdee={userProfileHook.tdee}
               bmiVal={userProfileHook.bmiVal}
               updateProfile={userProfileHook.updateProfile}
+              recommendedCalories={userProfileHook.recommendedCalories}
+              recommendedProtein={userProfileHook.recommendedProtein}
             />
             <GoalSettings
               goals={goalHook.goals}
@@ -242,58 +255,43 @@ function App() {
               mealRecords={mealHook.records}
               exerciseRecords={exerciseHook.records}
             />
-
-            {/* Firebase 云同步面板 */}
+            {/* Firebase 云同步 */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4">☁️ 云同步</h3>
               {firebase.user ? (
                 <div className="space-y-3">
                   <p className="text-sm text-green-500">✅ 已登录: {firebase.user.displayName || firebase.user.email}</p>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => firebase.syncToCloud({
-                        meals: mealHook.records,
-                        exercises: exerciseHook.records,
-                        tasks: taskHook.tasks,
-                        checkIns: checkInHook.checkInDays,
-                        goals: goalHook.goals,
-                      })}
-                      disabled={firebase.syncing}
-                      className="px-4 py-2 rounded-xl bg-blue-500 text-white text-sm hover:bg-blue-600 transition-colors disabled:opacity-60"
-                    >
+                    <button onClick={() => firebase.syncToCloud({
+                      meals: mealHook.records, exercises: exerciseHook.records, tasks: taskHook.tasks,
+                      checkIns: checkInHook.checkInDays, goals: goalHook.goals,
+                    })} disabled={firebase.syncing}
+                      className="px-4 py-2 rounded-xl bg-blue-500 text-white text-sm hover:bg-blue-600 disabled:opacity-60">
                       {firebase.syncing ? '同步中...' : '上传到云端'}
                     </button>
-                    <button
-                      onClick={async () => {
-                        const data = await firebase.loadFromCloud();
-                        if (data) {
-                          if (data.meals) mealHook.setRecords(data.meals);
-                          if (data.exercises) exerciseHook.setRecords(data.exercises);
-                          if (data.tasks) taskHook.setTasks(data.tasks);
-                          if (data.checkIns) checkInHook.setCheckInDays(data.checkIns);
-                          if (data.goals) goalHook.updateGoals(data.goals);
-                        }
-                      }}
-                      disabled={firebase.syncing}
-                      className="px-4 py-2 rounded-xl bg-green-500 text-white text-sm hover:bg-green-600 transition-colors disabled:opacity-60"
-                    >
+                    <button onClick={async () => {
+                      const data = await firebase.loadFromCloud();
+                      if (data) {
+                        if (data.meals) mealHook.setRecords(data.meals);
+                        if (data.exercises) exerciseHook.setRecords(data.exercises);
+                        if (data.tasks) taskHook.setTasks(data.tasks);
+                        if (data.checkIns) checkInHook.setCheckInDays(data.checkIns);
+                        if (data.goals) goalHook.updateGoals(data.goals);
+                      }
+                    }} disabled={firebase.syncing}
+                      className="px-4 py-2 rounded-xl bg-green-500 text-white text-sm hover:bg-green-600 disabled:opacity-60">
                       从云端下载
                     </button>
                   </div>
-                  {firebase.lastSync && (
-                    <p className="text-xs text-gray-400">上次同步: {firebase.lastSync.toLocaleString('zh-CN')}</p>
-                  )}
+                  {firebase.lastSync && <p className="text-xs text-gray-400">上次同步: {firebase.lastSync.toLocaleString('zh-CN')}</p>}
                   {firebase.error && <p className="text-xs text-red-500">{firebase.error}</p>}
                   <button onClick={firebase.signOut} className="text-sm text-gray-400 hover:text-red-500">退出登录</button>
                 </div>
               ) : (
                 <div>
-                  <p className="text-sm text-gray-400 mb-3">登录以同步数据到云端（需先在 firebase/config.js 中配置 Firebase）</p>
-                  <button
-                    onClick={firebase.signIn}
-                    disabled={firebase.loading}
-                    className="px-4 py-2 rounded-xl bg-blue-500 text-white text-sm hover:bg-blue-600 transition-colors disabled:opacity-60"
-                  >
+                  <p className="text-sm text-gray-400 mb-3">登录以同步数据到云端（需配置 Firebase）</p>
+                  <button onClick={firebase.signIn} disabled={firebase.loading}
+                    className="px-4 py-2 rounded-xl bg-blue-500 text-white text-sm hover:bg-blue-600 disabled:opacity-60">
                     {firebase.loading ? '登录中...' : 'Google 登录'}
                   </button>
                   {firebase.error && <p className="text-xs text-red-500 mt-2">{firebase.error}</p>}
@@ -308,14 +306,17 @@ function App() {
     }
   };
 
-  // 显示启动画面
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
+  // 首次问卷
+  if (showOnboarding) {
+    return <OnboardingWizard onComplete={handleOnboardingComplete} initialData={userProfileHook.profile} />;
+  }
+
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 ${darkMode ? 'dark' : ''}`}>
-      {/* 通知提醒 */}
       <ReminderNotifications
         mealRecords={mealHook.records}
         exerciseRecords={exerciseHook.records}
@@ -323,38 +324,14 @@ function App() {
         checkInDays={checkInHook.checkInDays}
         goals={goalHook.goals}
       />
-
-      {/* Toast 容器 */}
       <ToastContainer
-        position="top-center"
-        autoClose={2500}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
+        position="top-center" autoClose={2500} hideProgressBar={false} newestOnTop
+        closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover
         theme={darkMode ? 'dark' : 'light'}
       />
-
-      {/* 顶部导航 */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        darkMode={darkMode}
-        toggleDark={toggleDark}
-      />
-
-      {/* 主内容区 */}
-      <main className="max-w-6xl mx-auto px-4 py-6 pb-24">
-        {renderTab()}
-      </main>
-
-      {/* 深色模式浮动按钮 */}
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} darkMode={darkMode} toggleDark={toggleDark} />
+      <main className="max-w-6xl mx-auto px-4 py-6 pb-24">{renderTab()}</main>
       <DarkModeToggle darkMode={darkMode} toggle={toggleDark} />
-
-      {/* 底部信息 */}
       <footer className="text-center py-4 text-xs text-gray-400">
         🎵 命运和弦 · 数据存储在本地浏览器 · 隐私完全保护
       </footer>

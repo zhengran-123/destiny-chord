@@ -1,17 +1,28 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Plus, Trash2, UtensilsCrossed, X, Star } from 'lucide-react';
+import { Search, Plus, Trash2, UtensilsCrossed, X, Star, Copy, Clock, Bookmark } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { allFoods, searchFoods, foodCategories, getFoodsByCategory } from '../data/foods';
+import { allFoods, searchFoods, foodCategories, getFoodsByCategory, foodById } from '../data/foods';
 import { getToday } from '../utils/date';
 import FoodDatabaseView from './FoodDatabaseView';
 
-export default function FoodTracker({ mealRecords, customFoods, addMeal, deleteMeal, addCustomFood, date, setDate }) {
+const PRESETS_KEY = 'health_meal_presets';
+
+function getPresets() {
+  try { return JSON.parse(localStorage.getItem(PRESETS_KEY)) || []; }
+  catch { return []; }
+}
+function savePresets(p) { localStorage.setItem(PRESETS_KEY, JSON.stringify(p)); }
+
+export default function FoodTracker({ mealRecords, customFoods, addMeal, deleteMeal, addCustomFood }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFood, setSelectedFood] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [showDatabase, setShowDatabase] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [showPresets, setShowPresets] = useState(false);
+  const [presets, setPresets] = useState(getPresets);
+  const [presetName, setPresetName] = useState('');
 
   const [customForm, setCustomForm] = useState({
     name: '', calories: '', protein: '', carbs: '', fat: '', category: 'staple',
@@ -19,16 +30,31 @@ export default function FoodTracker({ mealRecords, customFoods, addMeal, deleteM
 
   const todayStr = getToday();
 
+  // 最近使用的食物（前8个去重）
+  const recentFoodIds = useMemo(() => {
+    const ids = [];
+    const seen = new Set();
+    const sorted = [...mealRecords].sort((a, b) => b.id - a.id);
+    for (const r of sorted) {
+      if (!seen.has(r.foodId) && r.foodId) {
+        ids.push(r.foodId);
+        seen.add(r.foodId);
+        if (ids.length >= 10) break;
+      }
+    }
+    return ids;
+  }, [mealRecords]);
+
+  const recentFoods = useMemo(() => {
+    return recentFoodIds.map(id => foodById[id]).filter(Boolean);
+  }, [recentFoodIds]);
+
   const filteredFoods = useMemo(() => {
     if (searchQuery.trim()) {
       return searchFoods(searchQuery);
     }
-    if (activeCategory === 'all') {
-      return allFoods;
-    }
-    if (activeCategory === 'custom') {
-      return customFoods;
-    }
+    if (activeCategory === 'all') return allFoods;
+    if (activeCategory === 'custom') return customFoods;
     return getFoodsByCategory(activeCategory);
   }, [searchQuery, activeCategory, customFoods]);
 
@@ -36,11 +62,16 @@ export default function FoodTracker({ mealRecords, customFoods, addMeal, deleteM
     return mealRecords.filter(m => m.date === todayStr).sort((a, b) => b.time.localeCompare(a.time));
   }, [mealRecords, todayStr]);
 
+  // 昨天的饮食
+  const yesterdayMeals = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const ys = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return mealRecords.filter(m => m.date === ys);
+  }, [mealRecords]);
+
   const handleAddFood = (food) => {
-    if (quantity <= 0) {
-      toast.warn('请输入有效数量');
-      return;
-    }
+    if (quantity <= 0) { toast.warn('请输入有效数量'); return; }
     addMeal(food, quantity, todayStr);
     toast.success(`已添加: ${food.name} ×${quantity}`);
     setSelectedFood(null);
@@ -48,23 +79,45 @@ export default function FoodTracker({ mealRecords, customFoods, addMeal, deleteM
     setSearchQuery('');
   };
 
-  const handleQuickAdd = (food) => {
-    addMeal(food, 1, todayStr);
+  const handleQuickAdd = (food, qty = 1) => {
+    addMeal(food, qty, todayStr);
     toast.success(`已添加: ${food.name}`);
   };
 
-  const handleAddCustomFood = () => {
-    if (!customForm.name || !customForm.calories) {
-      toast.warn('请填写食物名称和热量');
-      return;
-    }
-    const newFood = addCustomFood({
-      ...customForm,
-      categoryLabel: foodCategories.find(c => c.key === customForm.category)?.label || '自定义',
+  const handleCopyYesterday = () => {
+    let count = 0;
+    yesterdayMeals.forEach(meal => {
+      const food = allFoods.find(f => f.name === meal.foodName) || customFoods.find(f => f.name === meal.foodName);
+      if (food) { addMeal(food, meal.quantity, todayStr); count++; }
     });
-    toast.success(`自定义食物已添加: ${newFood.name}`);
-    setShowCustomForm(false);
-    setCustomForm({ name: '', calories: '', protein: '', carbs: '', fat: '', category: 'staple' });
+    toast.success(`已复制昨天 ${count} 条饮食记录`);
+  };
+
+  const handleSavePreset = () => {
+    if (!presetName.trim()) { toast.warn('请输入套餐名称'); return; }
+    const preset = { id: Date.now(), name: presetName.trim(), meals: todayMeals.map(m => ({foodId: m.foodId, foodName: m.foodName, quantity: m.quantity, category: m.category})) };
+    const updated = [...presets, preset];
+    setPresets(updated);
+    savePresets(updated);
+    setPresetName('');
+    setShowPresets(false);
+    toast.success('套餐已保存');
+  };
+
+  const handleLoadPreset = (preset) => {
+    let count = 0;
+    preset.meals.forEach(meal => {
+      const food = allFoods.find(f => f.name === meal.foodName) || customFoods.find(f => f.name === meal.foodName);
+      if (food) { addMeal(food, meal.quantity, todayStr); count++; }
+    });
+    toast.success(`已加载套餐: ${preset.name} (${count}项)`);
+  };
+
+  const deletePreset = (id) => {
+    const updated = presets.filter(p => p.id !== id);
+    setPresets(updated);
+    savePresets(updated);
+    toast.info('套餐已删除');
   };
 
   return (
@@ -74,29 +127,81 @@ export default function FoodTracker({ mealRecords, customFoods, addMeal, deleteM
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="搜索食物名称..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange outline-none transition-all"
-            />
+            <input type="text" placeholder="搜索食物名称..."
+              value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-brand-orange/50 outline-none transition-all" />
           </div>
-          <button
-            onClick={() => setShowDatabase(true)}
-            className="px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
-          >
-            食物库
-          </button>
-          <button
-            onClick={() => setShowCustomForm(true)}
-            className="px-4 py-3 rounded-xl bg-brand-orange text-white hover:bg-brand-orange-light transition-colors text-sm font-medium flex items-center gap-1"
-          >
-            <Plus size={16} />
-            自定义
-          </button>
+          <button onClick={() => setShowDatabase(true)}
+            className="px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium">食物库</button>
+          <button onClick={() => setShowCustomForm(true)}
+            className="px-4 py-3 rounded-xl bg-brand-orange text-white hover:bg-brand-orange-light transition-colors text-sm font-medium flex items-center gap-1">
+            <Plus size={16} /> 自定义</button>
         </div>
       </div>
+
+      {/* 快捷记录区 */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-xs font-medium text-gray-500 flex items-center gap-1"><Clock size={12} /> 快捷记录</h4>
+          <div className="flex gap-2">
+            {yesterdayMeals.length > 0 && (
+              <button onClick={handleCopyYesterday}
+                className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-xs text-gray-500 hover:bg-gray-200 flex items-center gap-1">
+                <Copy size={12} /> 复制昨日
+              </button>
+            )}
+            {todayMeals.length > 0 && (
+              <button onClick={() => setShowPresets(true)}
+                className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-xs text-gray-500 hover:bg-gray-200 flex items-center gap-1">
+                <Bookmark size={12} /> 保存套餐
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 最近食物 */}
+        {recentFoods.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {recentFoods.map(food => (
+              <button key={food.id} onClick={() => handleQuickAdd(food)}
+                className="px-2.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-xs text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                {food.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 已保存套餐 */}
+        {presets.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {presets.map(p => (
+              <button key={p.id} onClick={() => handleLoadPreset(p)}
+                className="px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-xs text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors">
+                📦 {p.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 保存套餐弹窗 */}
+      {showPresets && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowPresets(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold text-lg text-gray-800 dark:text-white mb-4">💾 保存今日饮食为套餐</h3>
+            <input type="text" placeholder="套餐名称（如：早餐标配）" value={presetName}
+              onChange={e => setPresetName(e.target.value)} autoFocus
+              className="w-full p-3 rounded-xl border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none mb-3" />
+            <p className="text-xs text-gray-400 mb-3">将保存 {todayMeals.length} 项食物记录</p>
+            <div className="flex gap-2">
+              <button onClick={() => setShowPresets(false)}
+                className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium">取消</button>
+              <button onClick={handleSavePreset}
+                className="flex-1 py-3 rounded-xl bg-brand-orange text-white font-semibold">保存套餐</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 分类筛选 */}
       {!searchQuery && (
